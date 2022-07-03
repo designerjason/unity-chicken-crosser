@@ -6,7 +6,9 @@ public class SpawnController : MonoBehaviour
 {
     public GameObject[] spawnPoint;
     public GameObject[] vehicles;
-    // Start is called before the first frame update
+    [SerializeField] int laneSpeed = 30;
+    float laneSpeedMultiplier = 1.33f;
+
     void Start()
     {
         InvokeRepeating("Spawner", 0, .5f);
@@ -20,11 +22,10 @@ public class SpawnController : MonoBehaviour
 
     // the fast lanes are faster!
     if(spawnIndex == 1 || spawnIndex == 3) {
-        vehicles[vehicleIndex].GetComponent<MoveForwards>().speed = 40;
+        vehicles[vehicleIndex].GetComponent<MoveForwards>().speed = laneSpeed * laneSpeedMultiplier;
     } else {
-        vehicles[vehicleIndex].GetComponent<MoveForwards>().speed = 30;
+        vehicles[vehicleIndex].GetComponent<MoveForwards>().speed = laneSpeed;
     }
-
         Instantiate(vehicles[vehicleIndex], spawnPoint[spawnIndex].transform.position, spawnPoint[spawnIndex].transform.rotation);
     }
 }

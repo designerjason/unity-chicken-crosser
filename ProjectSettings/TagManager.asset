@@ -6,6 +6,7 @@ TagManager:
   tags:
   - PlayerPosition
   - Vehicle
+  - Food
   layers:
   - Default
   - TransparentFX

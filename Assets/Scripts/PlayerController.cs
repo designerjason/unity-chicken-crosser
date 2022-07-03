@@ -6,27 +6,39 @@ public class PlayerController : MonoBehaviour
 {
     Animator animator;
     GameManager gameManager;
+    Vector3 playerScale;
+    float curScale;
+    float curScaleRate = 1.05f;
     public float speed = 15;
-    private Rigidbody playerRig;
-    private bool playerIsDead = false;
     public float horizontalInput;
     public float verticalInput;
+    private Rigidbody playerRig;
+    private bool playerIsDead = false;
     private float horizBounds = 35.0f;
     private float vertBoundsTop = -15.0f;
     private float vertBoundsBottom = 20.0f;
 
     void Start() {
+        playerScale = transform.localScale;
         animator = GameObject.Find("Player").GetComponent<Animator>();
-        gameManager = GameObject.Find("_GameManager").GetComponent<GameManager>();;
+        gameManager = GameObject.Find("_GameManager").GetComponent<GameManager>();
         playerRig = gameObject.GetComponent<Rigidbody>();
+        curScale = 1;
     }
 
     // Update is called once per frame
     void Update()
     {
+        AnimatorStateInfo animatorState = animator.GetCurrentAnimatorStateInfo(0);
+
         if(!playerIsDead) 
         {
             movePlayer();
+        }
+
+        if(animatorState.IsName("Eat") && animatorState.normalizedTime >= 1.10f)
+        {
+            animator.SetBool("Eat", false);
         }
     }
 
@@ -73,6 +85,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // eat the food little chick
+    public void EatFood()
+    {
+        Debug.Log("yum yum");
+        curScale = curScale * curScaleRate;
+        gameManager.curFoodCount++;
+        gameManager.foodCountText.text = gameManager.curFoodCount.ToString();
+        transform.localScale = new Vector3(playerScale.x*curScale,  playerScale.y*curScale, playerScale.z*curScale);
+    }
+
+    // when the chick hits something
     private void OnCollisionEnter(Collision other) {
         if(other.gameObject.CompareTag("Vehicle"))
         {
@@ -84,7 +107,18 @@ public class PlayerController : MonoBehaviour
             playerRig.constraints = RigidbodyConstraints.None;
             playerIsDead = true;
             
+            gameManager.GameOver();
             //destroy player with particle effects
         }    
+    }
+
+    // have I touched food?
+    private void OnTriggerEnter(Collider other) {
+        if(other.gameObject.CompareTag("Food"))
+        {
+            EatFood();
+            animator.SetBool("Eat", true);
+            gameManager.SpawnFood();
+        }
     }
 }
