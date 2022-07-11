@@ -6,6 +6,11 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    public AudioSource gameOverSound;
+    public AudioSource ambientSound;
+    public AudioSource musicSound;
+    public AudioSource deadSound;
+    public AudioSource impactSound;
     public GameObject food;
     public GameObject ScreenGameOver;
     public TextMeshProUGUI foodCountText;

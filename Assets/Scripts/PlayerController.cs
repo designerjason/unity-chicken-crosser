@@ -4,11 +4,15 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public AudioSource foodSound;
+    public AudioSource cluckSound;
     Animator animator;
     GameManager gameManager;
     Vector3 playerScale;
     float curScale;
     float curScaleRate = 1.05f;
+    public ParticleSystem feathers;
+    public ParticleSystem blood;
     public float speed = 15;
     public float horizontalInput;
     public float verticalInput;
@@ -61,11 +65,9 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.Translate(movement * Time.deltaTime * speed, Space.World);
-        //transform.Translate(Vector3.back * verticalInput * Time.deltaTime * speed);
 
         //top bounds limit
         if(transform.position.z <= vertBoundsTop) {
-            //transform.Translate(Vector3.forward / 9);
             transform.position = new Vector3(transform.position.x, transform.position.y , vertBoundsTop);
         }
 
@@ -93,22 +95,32 @@ public class PlayerController : MonoBehaviour
         gameManager.curFoodCount++;
         gameManager.foodCountText.text = gameManager.curFoodCount.ToString();
         transform.localScale = new Vector3(playerScale.x*curScale,  playerScale.y*curScale, playerScale.z*curScale);
+        animator.SetBool("Eat", true);
+        foodSound.Play();
+        cluckSound.Play();
     }
 
     // when the chick hits something
     private void OnCollisionEnter(Collision other) {
         if(other.gameObject.CompareTag("Vehicle"))
         {
+            if(playerIsDead == false) {
+                gameManager.deadSound.Play();
+                gameManager.impactSound.Play();
+                gameManager.gameOverSound.Play();
+                gameManager.musicSound.Stop();
+            }
+
             //vehicle hit
             Debug.Log("got hit by "+ other.gameObject.name);
-
+            feathers.Play();
+            blood.Play();
             //addforce away from vehicle
             playerRig.AddForce((gameObject.transform.position - other.transform.position).normalized * 1000, ForceMode.Impulse);
             playerRig.constraints = RigidbodyConstraints.None;
             playerIsDead = true;
             
             gameManager.GameOver();
-            //destroy player with particle effects
         }    
     }
 
@@ -117,7 +129,6 @@ public class PlayerController : MonoBehaviour
         if(other.gameObject.CompareTag("Food"))
         {
             EatFood();
-            animator.SetBool("Eat", true);
             gameManager.SpawnFood();
         }
     }
